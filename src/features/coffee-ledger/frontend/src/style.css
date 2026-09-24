@@ -448,6 +448,11 @@ input {
   flex-direction: column;
 }
 
+.ledger-totals p {
+  margin: 0;
+  padding: 0.4rem 0;
+}
+
 .ledger-scroll {
   flex: 1;
   min-height: 0;

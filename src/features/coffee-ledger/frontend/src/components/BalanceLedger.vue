@@ -1,9 +1,11 @@
 <template>
   <section class="panel ledger-panel">
     <h2>集計</h2>
-    <p>未徴収 {{ formatYen(uncollectedAmount) }}</p>
-    <p>徴収済み {{ formatYen(collectedAmount) }}</p>
-    <p>金庫 {{ formatYen(vaultAmount) }}</p>
+    <div class="ledger-totals">
+      <p>未徴収 {{ formatYen(uncollectedAmount) }}</p>
+      <p>徴収済み {{ formatYen(collectedAmount) }}</p>
+      <p>金庫 {{ formatYen(vaultAmount) }}</p>
+    </div>
     <p>
       <button type="button" class="primary" :disabled="busy" @click="$emit('export-csv')">CSV 出力</button>
     </p>
