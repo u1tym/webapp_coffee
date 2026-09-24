@@ -1,0 +1,86 @@
+<template>
+  <section class="panel">
+    <h2>集計</h2>
+    <p>未徴収 {{ formatYen(uncollectedAmount) }}</p>
+    <p>徴収済み {{ formatYen(collectedAmount) }}</p>
+    <p>金庫 {{ formatYen(vaultAmount) }}</p>
+    <table v-if="entries.length > 0" class="log-table">
+      <thead>
+        <tr>
+          <th>日時</th>
+          <th>契機</th>
+          <th>内容</th>
+          <th>未徴収</th>
+          <th>徴収済み</th>
+          <th>金庫</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(entry, index) in entries" :key="`${entry.occurred_at}-${entry.event_type}-${index}`">
+          <td>{{ formatDateTime(entry.occurred_at) }}</td>
+          <td>{{ eventLabel(entry) }}</td>
+          <td>{{ entryDetail(entry) }}</td>
+          <td>{{ formatYen(entry.uncollected_amount) }}</td>
+          <td>{{ formatYen(entry.collected_amount) }}</td>
+          <td>{{ formatYen(entry.vault_amount) }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <p v-else class="muted">変化はまだありません。</p>
+  </section>
+</template>
+
+<script setup lang="ts">
+import { formatDateTime, formatYen } from "../format";
+import type { SummaryEntry } from "../types";
+
+defineProps<{
+  uncollectedAmount: number;
+  collectedAmount: number;
+  vaultAmount: number;
+  entries: SummaryEntry[];
+}>();
+
+const eventLabels: Record<string, string> = {
+  drink_recorded: "飲む",
+  drink_cancelled: "飲用の取り消し",
+  payment_recorded: "支払",
+  payment_cancelled: "支払の取り消し",
+  safe_deposited: "金庫収納",
+  vault_operated: "金庫操作",
+  unpaid_adjusted: "未払い修正",
+};
+
+function eventLabel(entry: SummaryEntry): string {
+  if (entry.event_type === "vault_operated") {
+    return entry.direction === "withdrawal" ? "金庫操作（出金）" : "金庫操作（入金）";
+  }
+  return eventLabels[entry.event_type] ?? entry.event_type;
+}
+
+function entryDetail(entry: SummaryEntry): string {
+  if (entry.event_type === "unpaid_adjusted") {
+    const parts: string[] = [];
+    if (entry.name) {
+      parts.push(entry.name);
+    }
+    parts.push(`${formatYen(entry.previous_amount ?? 0)} → ${formatYen(entry.new_amount ?? 0)}`);
+    if (entry.reason) {
+      parts.push(entry.reason);
+    }
+    return parts.join(" · ");
+  }
+  const parts: string[] = [];
+  if (entry.name) {
+    parts.push(entry.name);
+  }
+  if (entry.reason) {
+    parts.push(entry.reason);
+  }
+  if (entry.reason_date) {
+    parts.push(entry.reason_date);
+  }
+  parts.push(formatYen(entry.amount ?? 0));
+  return parts.join(" · ");
+}
+</script>
