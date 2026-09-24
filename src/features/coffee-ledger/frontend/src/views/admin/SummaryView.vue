@@ -4,7 +4,6 @@
       <RouterLink to="/admin">← 管理トップ</RouterLink>
       <button type="button" class="primary" :disabled="busy" @click="onExportCsv">CSV 出力</button>
     </div>
-    <h1>集計</h1>
     <p v-if="error" class="error">{{ error }}</p>
     <BalanceLedger
       :uncollected-amount="summary.uncollected_amount"
