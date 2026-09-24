@@ -178,18 +178,25 @@ a {
 }
 
 .person-row {
-  display: grid;
-  grid-template-columns: minmax(3.2rem, 1fr) 4.8rem 3.4rem minmax(5.2rem, 7rem) 1.5rem;
-  align-items: center;
-  gap: 0.28rem;
-  padding: 0.12rem 0.15rem;
+  container-type: size;
   border-bottom: 1px solid #efe4d6;
   min-height: 0;
 }
 
+/* 行の高さ・幅に合わせて文字を拡大する（行は画面の高さを人数で割った高さになる） */
+.person-row-body {
+  display: grid;
+  grid-template-columns: minmax(3.2em, 1fr) 4.8em 3.4em minmax(5.2em, 7em) 1.5em;
+  align-items: center;
+  gap: 0.28em;
+  height: 100%;
+  padding: 0 0.15em;
+  font-size: clamp(0.9rem, min(42cqh, 4.4cqw), 1.8rem);
+}
+
 .person-name {
   font-weight: 700;
-  font-size: 0.98rem;
+  font-size: 1.1em;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -199,9 +206,9 @@ a {
 .drink-btn {
   border: 0;
   border-radius: 8px;
-  padding: 0.28rem 0.3rem;
+  padding: 0.28em 0.3em;
   font-weight: 700;
-  font-size: 0.88rem;
+  font-size: 0.95em;
 }
 
 .unpaid-btn {
@@ -222,8 +229,13 @@ a {
   background: #5b3318;
 }
 
+.person-row-body .icon-btn svg {
+  width: 1.2em;
+  height: 1.2em;
+}
+
 .last-drink {
-  font-size: 0.72rem;
+  font-size: 0.72em;
   color: #6a5a4c;
   text-align: right;
   line-height: 1.15;
