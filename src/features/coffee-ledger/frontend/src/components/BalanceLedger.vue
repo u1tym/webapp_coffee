@@ -1,5 +1,5 @@
 <template>
-  <section class="panel">
+  <section class="panel ledger-panel">
     <h2>集計</h2>
     <p>未徴収 {{ formatYen(uncollectedAmount) }}</p>
     <p>徴収済み {{ formatYen(collectedAmount) }}</p>
@@ -7,28 +7,30 @@
     <p>
       <button type="button" class="primary" :disabled="busy" @click="$emit('export-csv')">CSV 出力</button>
     </p>
-    <table v-if="entries.length > 0" class="log-table">
-      <thead>
-        <tr>
-          <th>日時</th>
-          <th>契機</th>
-          <th>内容</th>
-          <th>未徴収</th>
-          <th>徴収済み</th>
-          <th>金庫</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(entry, index) in entries" :key="`${entry.occurred_at}-${entry.event_type}-${index}`">
-          <td>{{ formatDateTime(entry.occurred_at) }}</td>
-          <td>{{ eventLabel(entry) }}</td>
-          <td>{{ entryDetail(entry) }}</td>
-          <td>{{ formatYen(entry.uncollected_amount) }}</td>
-          <td>{{ formatYen(entry.collected_amount) }}</td>
-          <td>{{ formatYen(entry.vault_amount) }}</td>
-        </tr>
-      </tbody>
-    </table>
+    <div v-if="entries.length > 0" class="ledger-scroll">
+      <table class="log-table ledger-table">
+        <thead>
+          <tr>
+            <th>日時</th>
+            <th>契機</th>
+            <th>内容</th>
+            <th class="num">未徴収</th>
+            <th class="num">徴収済み</th>
+            <th class="num">金庫</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(entry, index) in entries" :key="`${entry.occurred_at}-${entry.event_type}-${index}`">
+            <td class="nowrap">{{ formatDateTime(entry.occurred_at) }}</td>
+            <td class="nowrap">{{ eventLabel(entry) }}</td>
+            <td>{{ entryDetail(entry) }}</td>
+            <td class="num">{{ formatYen(entry.uncollected_amount) }}</td>
+            <td class="num">{{ formatYen(entry.collected_amount) }}</td>
+            <td class="num">{{ formatYen(entry.vault_amount) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     <p v-else class="muted">変化はまだありません。</p>
   </section>
 </template>

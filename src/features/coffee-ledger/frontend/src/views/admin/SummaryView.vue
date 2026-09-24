@@ -1,5 +1,5 @@
 <template>
-  <main class="page">
+  <main class="page summary-page">
     <p><RouterLink to="/admin">← 管理トップ</RouterLink></p>
     <h1>集計</h1>
     <p v-if="error" class="error">{{ error }}</p>

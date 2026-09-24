@@ -424,3 +424,41 @@ input {
   padding: 0.4rem 0.3rem;
   vertical-align: top;
 }
+
+.log-table .nowrap {
+  white-space: nowrap;
+}
+
+.log-table .num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.summary-page {
+  max-width: none;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.ledger-panel {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.ledger-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.ledger-table th {
+  position: sticky;
+  top: 0;
+  background: #fff;
+  white-space: nowrap;
+  z-index: 1;
+  box-shadow: inset 0 -1px 0 #efe4d6;
+}
