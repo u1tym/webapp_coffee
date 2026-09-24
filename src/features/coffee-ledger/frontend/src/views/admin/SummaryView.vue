@@ -1,6 +1,9 @@
 <template>
   <main class="page summary-page">
-    <p><RouterLink to="/admin">← 管理トップ</RouterLink></p>
+    <div class="page-top">
+      <RouterLink to="/admin">← 管理トップ</RouterLink>
+      <button type="button" class="primary" :disabled="busy" @click="onExportCsv">CSV 出力</button>
+    </div>
     <h1>集計</h1>
     <p v-if="error" class="error">{{ error }}</p>
     <BalanceLedger
@@ -8,8 +11,6 @@
       :collected-amount="summary.collected_amount"
       :vault-amount="summary.vault_amount"
       :entries="summary.entries"
-      :busy="busy"
-      @export-csv="onExportCsv"
     />
   </main>
 </template>

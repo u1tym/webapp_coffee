@@ -448,9 +448,28 @@ input {
   flex-direction: column;
 }
 
-.ledger-totals p {
+.page-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.ledger-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem 1.2rem;
+  margin-bottom: 0.6rem;
+}
+
+.ledger-head h2 {
   margin: 0;
-  padding: 0.4rem 0;
+}
+
+.ledger-head span {
+  white-space: nowrap;
 }
 
 .ledger-scroll {

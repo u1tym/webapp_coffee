@@ -1,14 +1,11 @@
 <template>
   <section class="panel ledger-panel">
-    <h2>集計</h2>
-    <div class="ledger-totals">
-      <p>未徴収 {{ formatYen(uncollectedAmount) }}</p>
-      <p>徴収済み {{ formatYen(collectedAmount) }}</p>
-      <p>金庫 {{ formatYen(vaultAmount) }}</p>
+    <div class="ledger-head">
+      <h2>集計</h2>
+      <span>未徴収 {{ formatYen(uncollectedAmount) }}</span>
+      <span>徴収済み {{ formatYen(collectedAmount) }}</span>
+      <span>金庫 {{ formatYen(vaultAmount) }}</span>
     </div>
-    <p>
-      <button type="button" class="primary" :disabled="busy" @click="$emit('export-csv')">CSV 出力</button>
-    </p>
     <div v-if="entries.length > 0" class="ledger-scroll">
       <table class="log-table ledger-table">
         <thead>
@@ -46,11 +43,6 @@ defineProps<{
   collectedAmount: number;
   vaultAmount: number;
   entries: SummaryEntry[];
-  busy: boolean;
-}>();
-
-defineEmits<{
-  "export-csv": [];
 }>();
 
 const eventLabels: Record<string, string> = {
