@@ -8,13 +8,16 @@
       :collected-amount="summary.collected_amount"
       :vault-amount="summary.vault_amount"
       :entries="summary.entries"
+      :busy="busy"
+      @export-csv="onExportCsv"
     />
   </main>
 </template>
 
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
-import { getSummary } from "../../api";
+import { fetchSummaryCsv, getSummary } from "../../api";
+import { saveFile } from "../../download";
 import type { ApiError, Summary } from "../../types";
 import BalanceLedger from "../../components/BalanceLedger.vue";
 
@@ -25,6 +28,7 @@ const summary = ref<Summary>({
   entries: [],
 });
 const error = ref("");
+const busy = ref(false);
 
 onMounted(async () => {
   try {
@@ -33,4 +37,20 @@ onMounted(async () => {
     error.value = (err as ApiError).message;
   }
 });
+
+async function onExportCsv(): Promise<void> {
+  if (busy.value) {
+    return;
+  }
+  busy.value = true;
+  error.value = "";
+  try {
+    const { blob, filename } = await fetchSummaryCsv();
+    saveFile(blob, filename);
+  } catch (err) {
+    error.value = (err as ApiError).message;
+  } finally {
+    busy.value = false;
+  }
+}
 </script>

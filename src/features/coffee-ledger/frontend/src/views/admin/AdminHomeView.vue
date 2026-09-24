@@ -18,6 +18,12 @@
       @deposit="onDeposit"
     />
     <VaultOperationForm :vault-amount="vault" :busy="busy" @operate="onVaultOperate" />
+    <VacuumPanel
+      :busy="busy"
+      :running="vacuumRunning"
+      :elapsed-seconds="vacuumSeconds"
+      @vacuum="onVacuum"
+    />
   </main>
 </template>
 
@@ -30,10 +36,12 @@ import {
   getCupPrice,
   listSafeDeposits,
   setCupPrice,
+  vacuumDatabase,
 } from "../../api";
 import type { ApiError, SafeDeposit } from "../../types";
 import CollectionPanel from "../../components/CollectionPanel.vue";
 import PriceForm from "../../components/PriceForm.vue";
+import VacuumPanel from "../../components/VacuumPanel.vue";
 import VaultOperationForm from "../../components/VaultOperationForm.vue";
 
 const cupPrice = ref<number | null>(null);
@@ -43,6 +51,8 @@ const vault = ref(0);
 const deposits = ref<SafeDeposit[]>([]);
 const error = ref("");
 const busy = ref(false);
+const vacuumRunning = ref(false);
+const vacuumSeconds = ref<number | null>(null);
 
 async function load(): Promise<void> {
   error.value = "";
@@ -103,5 +113,24 @@ function onVaultOperate(payload: {
   void run(async () => {
     await createVaultOperation(payload);
   });
+}
+
+async function onVacuum(): Promise<void> {
+  if (busy.value) {
+    return;
+  }
+  busy.value = true;
+  vacuumRunning.value = true;
+  vacuumSeconds.value = null;
+  error.value = "";
+  try {
+    const result = await vacuumDatabase();
+    vacuumSeconds.value = result.elapsed_seconds;
+  } catch (err) {
+    error.value = (err as ApiError).message;
+  } finally {
+    vacuumRunning.value = false;
+    busy.value = false;
+  }
 }
 </script>

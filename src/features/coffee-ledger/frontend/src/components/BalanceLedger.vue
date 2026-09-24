@@ -4,6 +4,9 @@
     <p>未徴収 {{ formatYen(uncollectedAmount) }}</p>
     <p>徴収済み {{ formatYen(collectedAmount) }}</p>
     <p>金庫 {{ formatYen(vaultAmount) }}</p>
+    <p>
+      <button type="button" class="primary" :disabled="busy" @click="$emit('export-csv')">CSV 出力</button>
+    </p>
     <table v-if="entries.length > 0" class="log-table">
       <thead>
         <tr>
@@ -39,6 +42,11 @@ defineProps<{
   collectedAmount: number;
   vaultAmount: number;
   entries: SummaryEntry[];
+  busy: boolean;
+}>();
+
+defineEmits<{
+  "export-csv": [];
 }>();
 
 const eventLabels: Record<string, string> = {

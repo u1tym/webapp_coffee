@@ -9,24 +9,31 @@ import type {
   SafeDeposit,
   Summary,
   UnpaidAdjustment,
+  VacuumResult,
   VaultOperation,
 } from "./types";
 
 const apiBase = import.meta.env.VITE_API_COFFEE_LEDGER_URL;
+
+function toApiError(body: unknown): ApiError {
+  const error = (body as { error?: ApiError } | null)?.error;
+  return error ?? { code: "INTERNAL_ERROR", message: "通信に失敗しました。" };
+}
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const headers = new Headers(init?.headers);
   if (init?.body && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
-  const response = await fetch(`${apiBase}${path}`, { cache: "no-store", ...init, headers });
+  let response: Response;
+  try {
+    response = await fetch(`${apiBase}${path}`, { cache: "no-store", ...init, headers });
+  } catch {
+    throw toApiError(null);
+  }
   const body: unknown = await response.json().catch(() => null);
   if (!response.ok) {
-    const error = (body as { error?: ApiError } | null)?.error;
-    throw (error ?? {
-      code: "INTERNAL_ERROR",
-      message: "通信に失敗しました。",
-    }) satisfies ApiError;
+    throw toApiError(body);
   }
   return body as T;
 }
@@ -130,4 +137,23 @@ export function getSummary(): Promise<Summary> {
 
 export function listOperationLogs(): Promise<{ operation_logs: OperationLog[] }> {
   return request("/operation-logs");
+}
+
+export function vacuumDatabase(): Promise<VacuumResult> {
+  return request("/maintenance/vacuum", { method: "POST" });
+}
+
+export async function fetchSummaryCsv(): Promise<{ blob: Blob; filename: string }> {
+  let response: Response;
+  try {
+    response = await fetch(`${apiBase}/summary/csv`, { cache: "no-store" });
+  } catch {
+    throw toApiError(null);
+  }
+  if (!response.ok) {
+    throw toApiError(await response.json().catch(() => null));
+  }
+  const disposition = response.headers.get("Content-Disposition") ?? "";
+  const filename = /filename="([^"]+)"/.exec(disposition)?.[1] ?? "coffee-ledger.csv";
+  return { blob: await response.blob(), filename };
 }

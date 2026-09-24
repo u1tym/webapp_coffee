@@ -12,6 +12,7 @@ from app.errors import register_exception_handlers  # noqa: E402
 from app.routers import (  # noqa: E402
     collection,
     drinks,
+    maintenance,
     operations,
     payments,
     people,
@@ -30,6 +31,7 @@ app.add_middleware(
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["Content-Disposition"],
 )
 
 app.include_router(people.router)
@@ -41,5 +43,6 @@ app.include_router(collection.router)
 app.include_router(vault.router)
 app.include_router(summary.router)
 app.include_router(operations.router)
+app.include_router(maintenance.router)
 
 get_logger().info("起動 cors_origins=%s", ",".join(cors_origins()))

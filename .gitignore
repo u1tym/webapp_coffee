@@ -1,0 +1,12 @@
+# 依存・ビルド成果物
+venv/
+node_modules/
+dist/
+__pycache__/
+.pytest_cache/
+
+# ログ（rules/16-logging.md）
+log/
+
+# バックエンドの .env は DB のパスワードを含むためコミットしない（ひな型は .env.example）
+**/backend/.env

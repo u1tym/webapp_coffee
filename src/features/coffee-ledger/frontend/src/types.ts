@@ -95,6 +95,10 @@ export type UnpaidAdjustment = {
   occurred_at: string;
 };
 
+export type VacuumResult = {
+  elapsed_seconds: number;
+};
+
 export type OperationLog = {
   id: number;
   occurred_at: string;

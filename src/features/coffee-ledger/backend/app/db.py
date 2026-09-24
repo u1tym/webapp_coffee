@@ -14,6 +14,11 @@ def connect() -> psycopg.Connection:
     return psycopg.connect(**db_connect_kwargs(), row_factory=dict_row)
 
 
+def connect_autocommit() -> psycopg.Connection:
+    """トランザクションを使わない接続（VACUUM など、トランザクション内で実行できない処理用）。"""
+    return psycopg.connect(**db_connect_kwargs(), row_factory=dict_row, autocommit=True)
+
+
 def get_db(request: Request) -> psycopg.Connection:
     return request.state.db
 
