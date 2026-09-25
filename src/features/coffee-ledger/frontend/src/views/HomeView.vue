@@ -18,7 +18,8 @@
     </div>
 
     <ModalDialog v-if="drinkDialog">
-      <p class="modal-message">飲みました。</p>
+      <p class="modal-message">毎度ありがとうございます</p>
+      <p class="modal-countdown muted" aria-live="polite">{{ drinkCountdown }}</p>
       <button type="button" class="primary" @click="closeDrinkDialog">OK</button>
     </ModalDialog>
 
@@ -60,7 +61,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import {
   cancelDrink,
   cancelPayment,
@@ -79,11 +80,15 @@ import ModalDialog from "../components/ModalDialog.vue";
 import PersonNameList from "../components/PersonNameList.vue";
 import TrashButton from "../components/TrashButton.vue";
 
+const DRINK_DIALOG_SECONDS = 5;
+
 const people = ref<Person[]>([]);
 const cupPrice = ref<number | null>(null);
 const error = ref("");
 const busy = ref(false);
 const drinkDialog = ref(false);
+const drinkCountdown = ref(0);
+let drinkTimer = 0;
 const payPerson = ref<Person | null>(null);
 const payments = ref<Payment[]>([]);
 const payAmount = ref(0);
@@ -126,6 +131,10 @@ onMounted(() => {
   });
 });
 
+onUnmounted(() => {
+  window.clearInterval(drinkTimer);
+});
+
 async function refreshPayPerson(personId: number): Promise<void> {
   const [personRes, paymentsRes] = await Promise.all([
     getPerson(personId),
@@ -145,14 +154,27 @@ async function onDrink(personId: number): Promise<void> {
   try {
     await recordDrink(personId);
     await loadList();
-    drinkDialog.value = true;
+    openDrinkDialog();
   } catch (err) {
     error.value = (err as ApiError).message;
     busy.value = false;
   }
 }
 
+function openDrinkDialog(): void {
+  drinkCountdown.value = DRINK_DIALOG_SECONDS;
+  drinkDialog.value = true;
+  window.clearInterval(drinkTimer);
+  drinkTimer = window.setInterval(() => {
+    drinkCountdown.value -= 1;
+    if (drinkCountdown.value <= 0) {
+      closeDrinkDialog();
+    }
+  }, 1000);
+}
+
 function closeDrinkDialog(): void {
+  window.clearInterval(drinkTimer);
   drinkDialog.value = false;
   busy.value = false;
 }
