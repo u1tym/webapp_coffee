@@ -1,7 +1,10 @@
 <template>
   <main class="home-screen">
     <header class="home-bar">
-      <CupPriceBanner :amount="cupPrice" />
+      <div class="home-bar-left">
+        <CupPriceBanner :amount="cupPrice" />
+        <button type="button" :disabled="csvBusy" @click="onExportCsv">CSV 出力</button>
+      </div>
       <CurrentDateTime />
       <p v-if="error" class="error compact">{{ error }}</p>
     </header>
@@ -65,6 +68,7 @@ import { computed, onMounted, onUnmounted, ref } from "vue";
 import {
   cancelDrink,
   cancelPayment,
+  fetchSummaryCsv,
   getCupPrice,
   getPerson,
   listPayments,
@@ -72,6 +76,7 @@ import {
   recordDrink,
   recordPayment,
 } from "../api";
+import { saveFile } from "../download";
 import { formatDateTime, formatYen, stepPayAmount } from "../format";
 import type { ApiError, Payment, Person } from "../types";
 import CupPriceBanner from "../components/CupPriceBanner.vue";
@@ -92,6 +97,7 @@ let drinkTimer = 0;
 const payPerson = ref<Person | null>(null);
 const payments = ref<Payment[]>([]);
 const payAmount = ref(0);
+const csvBusy = ref(false);
 
 const latestPayment = computed(() => payments.value[0] ?? null);
 
@@ -225,6 +231,22 @@ async function onCancelDrink(personId: number, drinkId: number): Promise<void> {
     error.value = (err as ApiError).message;
   } finally {
     busy.value = false;
+  }
+}
+
+async function onExportCsv(): Promise<void> {
+  if (csvBusy.value) {
+    return;
+  }
+  csvBusy.value = true;
+  error.value = "";
+  try {
+    const { blob, filename } = await fetchSummaryCsv("1month");
+    saveFile(blob, filename);
+  } catch (err) {
+    error.value = (err as ApiError).message;
+  } finally {
+    csvBusy.value = false;
   }
 }
 

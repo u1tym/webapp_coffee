@@ -123,7 +123,7 @@
 | POST | /safe-deposits | 不要 | 金庫収納 | REQ-010 |
 | POST | /vault-operations | 不要 | 金庫操作 | REQ-011 |
 | GET | /summary | 不要 | 集計 | REQ-017 |
-| GET | /summary/csv | 不要 | 金銭の動きの CSV 出力 | REQ-023 |
+| GET | /summary/csv | 不要 | 金銭の動きの CSV 出力（全期間・直近 1 か月） | REQ-023、REQ-025 |
 | GET | /operation-logs | 不要 | 操作記録の一覧 | REQ-018 |
 | POST | /maintenance/vacuum | 不要 | DB の整理 | REQ-022 |
 
@@ -509,13 +509,18 @@ API は最後の飲用以外の取り消しも受け付ける。最後の飲用�
 ### GET /summary/csv
 
 - **認証**: 不要
-- **要求**: なし
-- **応答（200）**: 金銭の動きの CSV。出来事と積み上げの値は `GET /summary` の `entries` と同じで、並びは古い順。
+- **要求**（クエリ）
+
+| 項目 | 型 | 必須 | 説明 |
+|------|----|----|------|
+| range | string | 任意 | `1month` のとき、要求を受けた時点から 1 か月前までの出来事に絞る（REQ-025）。省略時は全期間（REQ-023）。他の値は入力不正 |
+
+- **応答（200）**: 金銭の動きの CSV。出来事と積み上げの値は `GET /summary` の `entries` と同じ（`range=1month` のときは範囲内の出来事だけ）で、並びは古い順。積み上げの起点（未徴収・徴収済み・金庫）は範囲の始点より前の出来事も含めて計算する。
 
 | ヘッダ | 値 |
 |--------|----|
 | Content-Type | `text/csv; charset=utf-8` |
-| Content-Disposition | `attachment; filename="coffee-ledger-YYYYMMDD-HHmmss.csv"`（要求を受けた日本時間） |
+| Content-Disposition | `attachment; filename="coffee-ledger-YYYYMMDD-HHmmss.csv"`（`range` 省略時）または `attachment; filename="coffee-ledger-1month-YYYYMMDD-HHmmss.csv"`（`range=1month`）。日時は要求を受けた日本時間 |
 | Cache-Control | `no-store` |
 
 本文は UTF-8（先頭に BOM）、改行は CRLF。値にカンマ・引用符・改行があれば引用符で囲み、引用符は二重にする。
@@ -543,7 +548,11 @@ API は最後の飲用以外の取り消しも受け付ける。最後の飲用�
 
 金額はすべて区切りなしの整数。出来事が無いときは見出しの行だけを返す。操作記録には残さない。
 
-- **エラー**: 共通エラーのみ（JSON で返す）
+- **エラー**（JSON で返す）
+
+| HTTP ステータス | 条件 |
+|------|------|
+| 400 VALIDATION_ERROR | `range` が `1month` 以外の値 |
 
 ### GET /operation-logs
 
@@ -597,3 +606,5 @@ API は最後の飲用以外の取り消しも受け付ける。最後の飲用�
 | 2026-09-24 14:29 | 承認済み | 初版を承認 |
 | 2026-09-24 15:01 | 未承認 | `GET /summary/csv`（REQ-023）と `POST /maintenance/vacuum`（REQ-022）を追加。共通事項に CSV 応答・ヘッダ公開・トランザクションの例外を追記 |
 | 2026-09-24 15:03 | 承認済み | CSV 出力と DB の整理のエンドポイント追加を承認 |
+| 2026-09-28 | 未承認 | `GET /summary/csv` にクエリ `range=1month`（REQ-025）を追加。直近 1 か月分のファイル名とエラーを追記 |
+| 2026-09-28 | 承認済み | `range=1month` の追加を承認 |

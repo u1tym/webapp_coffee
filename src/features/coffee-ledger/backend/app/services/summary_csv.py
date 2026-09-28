@@ -7,7 +7,7 @@ import psycopg
 
 from app.logging_setup import get_logger
 from app.services import summary
-from app.timeutil import JST, now_jst
+from app.timeutil import JST, months_before, now_jst
 
 log = get_logger()
 
@@ -61,15 +61,23 @@ def _row(entry: dict[str, Any]) -> list[str]:
     ]
 
 
-def build_summary_csv(conn: psycopg.Connection) -> tuple[str, bytes]:
-    """金銭の動きを古い順の CSV にする。戻り値は（ファイル名, UTF-8 BOM 付きの本文）。"""
-    log.info("CSV出力要求")
-    entries = list(reversed(summary.get_summary(conn)["entries"]))
+def build_summary_csv(conn: psycopg.Connection, range_param: str | None = None) -> tuple[str, bytes]:
+    """金銭の動きを古い順の CSV にする。戻り値は（ファイル名, UTF-8 BOM 付きの本文）。
+
+    `range_param` が `1month` のとき、要求を受けた時点から 1 か月前までの出来事に絞る（積み上げの起点は全履歴で計算する）。
+    """
+    log.info("CSV出力要求 range=%s", range_param or "all")
+    now = now_jst()
+    since = months_before(now, 1) if range_param == "1month" else None
+    entries = list(reversed(summary.get_summary(conn, since=since)["entries"]))
     buffer = io.StringIO()
     writer = csv.writer(buffer, lineterminator="\r\n")
     writer.writerow(HEADER)
     for entry in entries:
         writer.writerow(_row(entry))
-    filename = now_jst().strftime("coffee-ledger-%Y%m%d-%H%M%S.csv")
+    if range_param == "1month":
+        filename = now.strftime("coffee-ledger-1month-%Y%m%d-%H%M%S.csv")
+    else:
+        filename = now.strftime("coffee-ledger-%Y%m%d-%H%M%S.csv")
     log.info("CSV出力成功 filename=%s rows=%s", filename, len(entries))
     return filename, ("﻿" + buffer.getvalue()).encode("utf-8")

@@ -163,7 +163,8 @@ def _collect_events(conn: psycopg.Connection) -> list[dict[str, Any]]:
     return events
 
 
-def get_summary(conn: psycopg.Connection) -> dict[str, Any]:
+def get_summary(conn: psycopg.Connection, since: datetime | None = None) -> dict[str, Any]:
+    """`since` を指定すると、積み上げは全履歴で計算しつつ `entries` は `since` 以降だけを返す。"""
     events = _collect_events(conn)
     uncollected = 0
     collected = 0
@@ -202,6 +203,8 @@ def get_summary(conn: psycopg.Connection) -> dict[str, Any]:
             collected = 0
         if vault < 0:
             vault = 0
+        if since is not None and event["occurred_at"] < since:
+            continue
         rows.append(
             {
                 "occurred_at": to_iso(event["occurred_at"]),

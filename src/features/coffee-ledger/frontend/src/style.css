@@ -82,6 +82,12 @@ a {
   margin-bottom: 0.15rem;
 }
 
+.home-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
 .home-bar .price {
   margin: 0;
   font-size: 0.95rem;
@@ -287,6 +293,31 @@ input {
   padding: 0.35rem 0.5rem;
   border: 1px solid #cbbba8;
   border-radius: 6px;
+}
+
+.onscreen-keyboard,
+.numpad {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 1rem;
+}
+
+.onscreen-keyboard-row,
+.numpad-row {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.onscreen-keyboard button,
+.numpad button {
+  flex: 1;
+  min-width: 2.2rem;
+  padding: 0.5rem 0;
+}
+
+.password-clear {
+  margin-top: 0.8rem;
 }
 
 .records,

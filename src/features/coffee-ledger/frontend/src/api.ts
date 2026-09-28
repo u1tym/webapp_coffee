@@ -143,10 +143,13 @@ export function vacuumDatabase(): Promise<VacuumResult> {
   return request("/maintenance/vacuum", { method: "POST" });
 }
 
-export async function fetchSummaryCsv(): Promise<{ blob: Blob; filename: string }> {
+export async function fetchSummaryCsv(
+  range?: "1month",
+): Promise<{ blob: Blob; filename: string }> {
+  const query = range ? `?range=${range}` : "";
   let response: Response;
   try {
-    response = await fetch(`${apiBase}/summary/csv`, { cache: "no-store" });
+    response = await fetch(`${apiBase}/summary/csv${query}`, { cache: "no-store" });
   } catch {
     throw toApiError(null);
   }
